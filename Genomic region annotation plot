@@ -1,0 +1,50 @@
+setwd("D:/PPARG-Adipogenesis/pparg-chip-seq/Day_6")
+
+library(readxl)
+library(ggplot2)
+library(scales)
+
+# Load the Excel file
+file_path <- "chip.xlsx"  # Update the path if needed
+data <- read_excel(file_path, sheet = "Sheet5")  # Adjust sheet name if necessary
+
+# Count the frequency of each annotation type
+annotation_counts <- as.data.frame(table(data$annotation))
+colnames(annotation_counts) <- c("Annotation", "Count")
+
+# Calculate percentages
+annotation_counts$Percentage <- round((annotation_counts$Count / sum(annotation_counts$Count)) * 100, 1)
+annotation_counts$Legend_Label <- paste0(annotation_counts$Annotation, " (", annotation_counts$Count, ", ", annotation_counts$Percentage, "%)")
+
+# Define a brighter color palette with transparency
+brighter_colors <- c("#FF666680", "#FFB26680", "#FFFF6680", "#66FF6680", "#66B2FF80", "#B266FF80", "#FF66B280")                  # Adjust colurs if necessary
+
+
+# Create a pie chart with black outlines and transparency
+pie_chart <- ggplot(annotation_counts, aes(x = "", y = Count, fill = Legend_Label)) +
+  geom_bar(stat = "identity", width = 1, color = "black", alpha = 0.6) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  ggtitle("Distribution of Annotations- Day 6") +
+  theme(legend.position = "right") +
+  scale_fill_manual(values = brighter_colors)
+
+# Display the pie chart
+print(pie_chart)
+
+# Create a bar graph with X and Y axis lines but no grid lines
+bar_graph <- ggplot(annotation_counts, aes(x = reorder(Annotation, -Count), y = Count, fill = Annotation)) +
+  geom_bar(stat = "identity", color = "black", alpha = 0.6) +
+  geom_text(aes(label = paste0(Count, " (", Percentage, "%)")), vjust = -0.5, color = "black") +
+  scale_fill_manual(values = brighter_colors) +
+  theme_minimal() +
+  ggtitle("Annotation Count Distribution- Day 6") +
+  xlab("Annotation") +
+  ylab("Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"))
+
+# Display the bar graph
+print(bar_graph)
