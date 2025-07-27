@@ -35,7 +35,7 @@ sortBam("hg38.bam", "SR_hg38_2H_Rep2")
 indexBam("SR_hg38_2H_Rep2.bam")
 ____________________________________________________________________________________________
 
-#Run in UBUNTU
+#Run externally in Python
 macs2 callpeak -t SR_hg38_2H_Rep2.bam -n Mel_Rep2 -c control.bam --outdir PeakDirectory 
 
 ___________________________________________________________________________________________
