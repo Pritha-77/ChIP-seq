@@ -1,0 +1,111 @@
+fqStreamer <- FastqStreamer("C:/GSE77039/PPARG_2h/Rep2/SRR3110390.fastq", n = 1e+05)
+
+TotalReads <- 0
+TotalReadsFilt <- 0
+while (length(fq <- yield(fqStreamer)) > 0) {
+  TotalReads <- TotalReads + length(fq)
+  filt1 <- fq[alphabetScore(fq) > 300]
+  filt2 <- filt1[alphabetFrequency(sread(filt1))[, "N"] < 10]
+  TotalReadsFilt <- TotalReadsFilt + length(filt2)
+  writeFastq(filt2, "filtered_SRR3110390.fastq", mode = "a")
+}
+library(BSgenome.Hsapiens.UCSC.hg38)
+BSgenome.Hsapiens.UCSC.hg38
+
+mainChromosomes <- paste0("chr", c(1:22, "X", "Y", "M"))
+mainChrSeq <- lapply(mainChromosomes, function(x) BSgenome.Hsapiens.UCSC.hg38[[x]])
+names(mainChrSeq) <- mainChromosomes
+mainChrSeqSet <- DNAStringSet(mainChrSeq)
+mainChrSeqSet
+
+writeXStringSet(mainChrSeqSet, "BSgenome.Hsapiens.UCSC.hg38.mainChrs.fa")
+
+
+#Creating an Rsubread index
+library(Rsubread)
+buildindex("hg38_mainchrs", "BSgenome.Hsapiens.UCSC.hg38.mainChrs.fa", memory = 8000,
+           indexSplit = TRUE)
+
+#Rsubread ChIPseq alignment
+myMapped <- align("hg38_mainchrs", "filtered_SRR3110390.fastq", output_format = "BAM",
+                  output_file = "hg38.bam", type = "dna", phredOffset = 64, nthreads = 4)
+
+library(Rsamtools)
+sortBam("hg38.bam", "SR_hg38_2H_Rep2")
+indexBam("SR_hg38_2H_Rep2.bam")
+____________________________________________________________________________________________
+
+#Run in UBUNTU
+macs2 callpeak -t SR_hg38_2H_Rep2.bam -n Mel_Rep2 -c control.bam --outdir PeakDirectory 
+
+___________________________________________________________________________________________
+library(ChIPQC)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+toBlkList <- "C:/GSE77039/PPARG_48h/Rep1/ENCFF356LFX.bed/GRCh38_unified_blacklist.bed"
+chipqc_hg38 <- ChIPQCsample("SR_hg38.bam", annotation = "hg38", blacklist = toBlkList, chromosomes = paste0("chr", 1:10))
+class(chipqc_hg38)
+chipqc_hg38
+plotCC(chipqc_hg38, facetBy = "Sample")
+plotSSD(chipqc_hg38) + xlim(0, 5)
+macsPeaks <- "C:/GSE77039/PPARG_48h/Rep1/PeakDirectory/Mel_Rep1_peaks.xls"
+macsPeaks_DF <- read.delim(macsPeaks)
+macsPeaks_DF[1:8, ]
+
+macsPeaks_DF <- read.delim(macsPeaks, comment.char = "#")
+macsPeaks_DF[1:2, ]
+
+library(GenomicRanges)
+macsPeaks_GR <- GRanges(seqnames = macsPeaks_DF[, "chr"], IRanges(macsPeaks_DF[,
+                                                                               "start"], macsPeaks_DF[, "end"]))
+macsPeaks_GR
+seqnames(macsPeaks_GR)
+ranges(macsPeaks_GR)
+mcols(macsPeaks_GR) <- macsPeaks_DF[, c("abs_summit", "fold_enrichment")]
+macsPeaks_GR
+
+library(rtracklayer)
+macsPeaks_GR_np <- import("C:/GSE77039/PPARG_48h/Rep1/PeakDirectory/Mel_Rep1_peaks.narrowPeak", format = "narrowPeak")
+macsPeaks_GR_np
+
+library(rtracklayer)
+blkList <- import.bed(toBlkList)
+macsPeaks_GR <- macsPeaks_GR[!macsPeaks_GR %over% blkList]
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(org.Hs.eg.db)
+library(GenomeInfoDb)
+library(ChIPseeker)
+
+peakAnno <- annotatePeak(macsPeaks_GR, tssRegion = c(-10000, 20000), TxDb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+                         annoDb = "org.Hs.eg.db")
+
+class(peakAnno)
+peakAnno
+peakAnno_GR <- as.GRanges(peakAnno)
+peakAnno_DF <- as.data.frame(peakAnno)
+peakAnno_GR[1:2, ]
+peakAnno_DF[1:2, ]
+
+library(openxlsx)
+write.xlsx(peakAnno_DF, file = "C:/GSE77039/PPARG_48h/Rep1/PeakDirectory/peaks_with_gene_name1.xlsx")
+
+peakAnno_GR[1:2, ]
+plotAnnoBar(peakAnno)
+plotAnnoPie(peakAnno)
+plotDistToTSS(peakAnno)
+
+install.packages("viridis")
+library(viridis)
+colors <- viridis(n = 28) 
+plotAnnoPie(peakAnno, col = colors)
+
+myAnnotation <- as.data.frame(peakAnno)
+simpleAnnotation <- as.vector(myAnnotation$annotation)
+simpleAnnotation[!simpleAnnotation %in% c("Promoter", "Distal Intergenic")] <- "other"
+forPlot <- data.frame(Annotation=simpleAnnotation)
+library(ggplot2)
+ggplot(forPlot,aes(x=Annotation,fill=Annotation))+geom_bar()+coord_flip()+theme_bw()+ggtitle("Simple distribution of binding sites")
+
+library(ggupset)
+upsetplot(peakAnno, vennpie = F)
+
+
