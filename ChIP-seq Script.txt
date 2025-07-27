@@ -41,6 +41,9 @@ macs2 callpeak -t SR_hg38_2H_Rep2.bam -n Mel_Rep2 -c control.bam --outdir PeakDi
 ___________________________________________________________________________________________
 library(ChIPQC)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+
+#You can find a Blacklist for most genomes directly from the Encode website: https://www.encodeproject.org/annotations/ENCSR636HFF/
+
 toBlkList <- "C:/GSE77039/PPARG_48h/Rep1/ENCFF356LFX.bed/GRCh38_unified_blacklist.bed"
 chipqc_hg38 <- ChIPQCsample("SR_hg38.bam", annotation = "hg38", blacklist = toBlkList, chromosomes = paste0("chr", 1:10))
 class(chipqc_hg38)
