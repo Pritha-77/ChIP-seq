@@ -1,3 +1,7 @@
+#Perform a quality check of the FASTQ files with FastQC (external, Python) before performing ChIP-seq analysis
+
+
+
 fqStreamer <- FastqStreamer("C:/GSE77039/PPARG_2h/Rep2/SRR3110390.fastq", n = 1e+05)
 
 TotalReads <- 0
@@ -110,5 +114,6 @@ ggplot(forPlot,aes(x=Annotation,fill=Annotation))+geom_bar()+coord_flip()+theme_
 
 library(ggupset)
 upsetplot(peakAnno, vennpie = F)
+
 
 
