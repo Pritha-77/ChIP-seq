@@ -1,4 +1,4 @@
-setwd("D:/PPARG-Adipogenesis/pparg-chip-seq/Day_6")
+setwd("D:/CRC/pparg-chip-seq")
 
 library(readxl)
 library(ggplot2)
