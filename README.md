@@ -1,8 +1,4 @@
-Here's a clean and copyable `README.md` file for your ChIP-seq analysis pipeline using R (and some external MACS2 steps). This README is structured for a GitHub repository, providing clarity for collaborators or future reference.
 
----
-
-```markdown
 # PPARG ChIP-Seq Analysis Pipeline (Human hg38)
 
 This repository contains a complete ChIP-Seq data analysis pipeline for **PPARG** using R and human genome reference **hg38**. It includes read filtering, alignment, peak calling, quality control, peak annotation, and visualization.
@@ -89,22 +85,3 @@ ggplot(...) + geom_bar()
 
 * `peaks_with_gene_name1.xlsx`: Annotated peak list
 * `Annotation_Pie.png`, `BarPlot.png`: Distribution plots
-
-## 🧠 Notes
-
-* Make sure your working directory paths and file names are correct.
-* Replace placeholder file paths (`"C:/..."`) with relative paths if using version control.
-
-## 📜 Citation
-
-If you use this code, please cite the appropriate tools:
-
-* **MACS2**: Zhang et al., 2008
-* **ChIPseeker**: Yu et al., 2015
-* **ChIPQC**: Carroll et al., 2014
-
----
-
-
-Let me know if you want me to generate the full repo file structure (`.R` scripts, `DESCRIPTION`, etc.) or a zipped GitHub-ready bundle.
-```
