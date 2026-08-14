@@ -32,7 +32,10 @@ buildindex("hg38_mainchrs", "BSgenome.Hsapiens.UCSC.hg38.mainChrs.fa", memory = 
 
 #Rsubread ChIPseq alignment
 myMapped <- align("hg38_mainchrs", "filtered_SRR3110390.fastq", output_format = "BAM",
-                  output_file = "hg38.bam", type = "dna", phredOffset = 64, nthreads = 4)
+                  output_file = "hg38.bam", type = "dna", phredOffset = 33, nthreads = 4) 
+
+# phredOffset = 33   Standard modern Sanger/Illumina format
+# phredOffset = 64   old Illumina 1.3–1.5 quality format
 
 library(Rsamtools)
 sortBam("hg38.bam", "SR_hg38_2H_Rep2")
@@ -46,15 +49,15 @@ ________________________________________________________________________________
 library(ChIPQC)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 
-#You can find a Blacklist for most genomes directly from the Encode website: https://www.encodeproject.org/annotations/ENCSR636HFF/
+#You can find a Blacklist for most genomes directly from the ENCODE website: https://www.encodeproject.org/annotations/ENCSR636HFF/
 
-toBlkList <- "C:/GSE77039/PPARG_48h/Rep1/ENCFF356LFX.bed/GRCh38_unified_blacklist.bed"
-chipqc_hg38 <- ChIPQCsample("SR_hg38.bam", annotation = "hg38", blacklist = toBlkList, chromosomes = paste0("chr", 1:10))
+toBlkList <- "C:/GSE77039/PPARG_2h/Rep2/ENCFF356LFX.bed/GRCh38_unified_blacklist.bed"
+chipqc_hg38 <- ChIPQCsample("SR_hg38_2H_Rep2.bam", annotation = "hg38", blacklist = toBlkList, chromosomes = paste0("chr", 1:10))
 class(chipqc_hg38)
 chipqc_hg38
 plotCC(chipqc_hg38, facetBy = "Sample")
 plotSSD(chipqc_hg38) + xlim(0, 5)
-macsPeaks <- "C:/GSE77039/PPARG_48h/Rep1/PeakDirectory/Mel_Rep1_peaks.xls"
+macsPeaks <- "C:/GSE77039/PPARG_2h/Rep2/PeakDirectory/Mel_Rep1_peaks.xls"
 macsPeaks_DF <- read.delim(macsPeaks)
 macsPeaks_DF[1:8, ]
 
@@ -71,7 +74,7 @@ mcols(macsPeaks_GR) <- macsPeaks_DF[, c("abs_summit", "fold_enrichment")]
 macsPeaks_GR
 
 library(rtracklayer)
-macsPeaks_GR_np <- import("C:/GSE77039/PPARG_48h/Rep1/PeakDirectory/Mel_Rep1_peaks.narrowPeak", format = "narrowPeak")
+macsPeaks_GR_np <- import("C:/GSE77039/PPPARG_2h/Rep2/PeakDirectory/Mel_Rep1_peaks.narrowPeak", format = "narrowPeak")
 macsPeaks_GR_np
 
 library(rtracklayer)
@@ -93,7 +96,7 @@ peakAnno_GR[1:2, ]
 peakAnno_DF[1:2, ]
 
 library(openxlsx)
-write.xlsx(peakAnno_DF, file = "C:/GSE77039/PPARG_48h/Rep1/PeakDirectory/peaks_with_gene_name1.xlsx")
+write.xlsx(peakAnno_DF, file = "C:/GSE77039/PPPARG_2h/Rep2/PeakDirectory/peaks_with_gene_name1.xlsx")
 
 peakAnno_GR[1:2, ]
 plotAnnoBar(peakAnno)
